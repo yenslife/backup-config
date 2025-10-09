@@ -1,0 +1,21 @@
+backup_dir: /mnt/backup          # 壓縮檔輸出路徑（本機）
+root_dir_name: config_backup     # 壓縮檔內最上層資料夾名稱（可省略）
+
+services:
+  - name: kafka
+    config_paths:                # 要備份的「單一檔案」
+      - /var/log/kafka/server.properties
+      - /var/log/kafka/controller.properties
+
+  - name: mongodb
+    config_paths:
+      - /etc/mongod.conf
+
+  - name: nginx
+    config_paths:
+      - /etc/nginx/nginx.conf
+    include_dirs:                # （可選）整個資料夾遞迴打包
+      - /etc/nginx/conf.d
+    include_globs:               # （可選）支援萬用字元
+      - /etc/nginx/sites-enabled/*.conf
+      - /opt/myapp/**/config*.yml

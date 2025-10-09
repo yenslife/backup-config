@@ -1,0 +1,8 @@
+backup_dir: /home/brick2          # 壓縮檔輸出路徑（本機）
+root_dir_name: config_backup     # 壓縮檔內最上層資料夾名稱（可省略）
+
+services:
+  - name: kafka-fake
+    config_paths:                # 要備份的「單一檔案」
+      - /home/brick2/lab0-c/console.c
+

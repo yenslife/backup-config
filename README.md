@@ -1,5 +1,7 @@
 # 🧩 Config Backup Script
 
+[中文說明 (台灣正體)](README.zh-TW.md)
+
 This is a Shell Script designed to automate the backup of configuration files and directories for various services. It reads a single YAML configuration file to gather, organize, and compress specified paths into a timestamped `.tar.gz` archive.
 
 This tool is ideal for system administrators or anyone looking to simplify and centralize the process of backing up critical configuration files to a designated location, such as an external drive or a NAS.

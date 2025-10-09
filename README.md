@@ -50,7 +50,8 @@ The script requires `yq` to parse the YAML configuration file. `yq` is a lightwe
 Create your YAML configuration file. The default location is `/etc/config_backup.yaml`.
 
 ```bash
-sudo touch /etc/config_backup.yaml```
+sudo touch /etc/config_backup.yaml
+```
 
 Now, populate this file with your desired backup settings. See the configuration format section below for details and examples.
 

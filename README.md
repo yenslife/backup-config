@@ -1,233 +1,202 @@
-🧩 Config Backup Script
+# 🧩 Config Backup Script
 
-這是一個 自動化備份各服務設定檔 的 Shell Script，
-可依照單一 YAML 檔的設定，將多個服務的設定檔或資料夾收集起來，統一打包成壓縮檔，
-方便系統管理員或自動化備份系統（如外接硬碟同步、NAS 備份）統一抓取。
+This is a Shell Script designed to automate the backup of configuration files and directories for various services. It reads a single YAML configuration file to gather, organize, and compress specified paths into a timestamped `.tar.gz` archive.
 
-✨ 功能簡介
+This tool is ideal for system administrators or anyone looking to simplify and centralize the process of backing up critical configuration files to a designated location, such as an external drive or a NAS.
 
-以單一設定檔 config_backup.yaml 控制所有服務備份。
+✨ **Key Features**
 
-支援：
+*   **Centralized Configuration**: Manage all backup targets from a single `config_backup.yaml` file.
+*   **Flexible Path Definitions**: Supports backing up:
+    *   Individual files (`config_paths`).
+    *   Entire directories recursively (`include_dirs`).
+    *   Files and directories using wildcard patterns (`include_globs`, e.g., `*.conf`, `/**/`).
+*   **Automated Organization**: Creates a clean, structured archive with a dedicated folder for each service.
+*   **Conflict Resolution**: Automatically renames files with conflicting names by appending a unique hash to prevent overwrites.
+*   **Robust and Simple**: Written in `bash` with minimal dependencies (`yq`), making it highly portable and easy to understand.
+*   **Timestamped Archives**: Generates uniquely named backup files like `config_backup_YYYY-MM-DD_HH:MM.tar.gz`.
 
-多服務配置
+---
 
-多檔案、多資料夾、多萬用字元 (*, **)
+## 🚀 Getting Started
 
-自動建立備份路徑與暫存資料夾
+### **1. Prerequisites**
 
-防止檔名衝突（自動加上雜湊後綴）
+The script requires `yq` to parse the YAML configuration file. `yq` is a lightweight and portable command-line YAML processor.
 
-自動打包為 .tar.gz
+**Installation (Linux):**
 
-執行後會在 backup_dir 目錄中生成：
+*   **Debian/Ubuntu:**
+    ```bash
+    sudo apt-get update && sudo apt-get install -y yq
+    ```
+*   **RHEL/CentOS/Fedora:**
+    ```bash
+    sudo yum install -y yq
+    ```
 
-config_backup_YYYY-MM-DD HH:MM.tar.gz
+### **2. Script Installation**
 
-🗂️ YAML 設定檔格式
+1.  Save the script content as `/usr/local/bin/backup_configs.sh`.
+2.  Make the script executable:
+    ```bash
+    sudo chmod +x /usr/local/bin/backup_configs.sh
+    ```
 
-預設路徑：/etc/config_backup.yaml
-（也可自行放在任意位置並於執行時指定）
+### **3. Create the Configuration File**
 
-backup_dir: /mnt/backup          # 壓縮檔輸出路徑（本機）
-root_dir_name: config_backup     # 壓縮檔內最上層資料夾名稱（可省略）
+Create your YAML configuration file. The default location is `/etc/config_backup.yaml`.
+
+```bash
+sudo touch /etc/config_backup.yaml```
+
+Now, populate this file with your desired backup settings. See the configuration format section below for details and examples.
+
+---
+
+## ⚙️ Configuration (`config_backup.yaml`)
+
+The YAML file defines the backup destination and the specific files/directories for each service.
+
+### **File Structure**
+
+```yaml
+# --- Global Settings ---
+
+# [Required] The absolute path where the final .tar.gz archive will be saved.
+backup_dir: /mnt/backup
+
+# [Optional] The name of the root folder inside the .tar.gz archive.
+# Defaults to "config_backup" if omitted.
+root_dir_name: my_server_configs
+
+# --- Service Definitions ---
 
 services:
+  # --- Service 1: A simple service with a few config files ---
   - name: kafka
-    config_paths:                # 要備份的「單一檔案」
-      - /var/log/kafka/server.properties
-      - /var/log/kafka/controller.properties
+    # A list of individual files to back up.
+    config_paths:
+      - /etc/kafka/server.properties
+      - /etc/kafka/zookeeper.properties
 
+  # --- Service 2: A service with a directory and wildcard patterns ---
+  - name: nginx
+    # You can mix and match different path types.
+    config_paths:
+      - /etc/nginx/nginx.conf
+    # Recursively backs up the entire contents of this directory.
+    include_dirs:
+      - /etc/nginx/conf.d
+    # Backs up files and directories matching glob patterns.
+    # The `**` pattern enables recursive matching.
+    include_globs:
+      - /etc/nginx/sites-enabled/*.conf
+      - /opt/myapp/**/config*.yml
+
+  # --- Service 3: A service with only one file ---
   - name: mongodb
     config_paths:
       - /etc/mongod.conf
 
-  - name: nginx
-    config_paths:
-      - /etc/nginx/nginx.conf
-    include_dirs:                # （可選）整個資料夾遞迴打包
-      - /etc/nginx/conf.d
-    include_globs:               # （可選）支援萬用字元
-      - /etc/nginx/sites-enabled/*.conf
-      - /opt/myapp/**/config*.yml
+```
 
-📦 壓縮檔結構範例
+### **Configuration Parameters**
 
-執行後會在 /mnt/backup 產生：
+| Key             | Type   | Required | Default           | Description                                                                                             |
+| --------------- | ------ | -------- | ----------------- | ------------------------------------------------------------------------------------------------------- |
+| `backup_dir`    | string | Yes      | `/mnt/backup`     | The directory where the final compressed archive will be stored.                                        |
+| `root_dir_name` | string | No       | `config_backup`   | The name of the top-level folder inside the generated `.tar.gz` file.                                     |
+| `services`      | array  | Yes      |                   | A list of service objects to be backed up.                                                              |
+| `name`          | string | Yes      |                   | A unique name for the service, used as the subdirectory name in the archive.                            |
+| `config_paths`  | array  | No       |                   | A list of absolute paths to individual files.                                                           |
+| `include_dirs`  | array  | No       |                   | A list of absolute paths to directories. The entire directory will be copied recursively.                 |
+| `include_globs` | array  | No       |                   | A list of patterns (globs) to match files and directories. Supports `*` and `**` for recursive matching. |
 
-/mnt/backup/
-└── config_backup_2025-10-09 18:00.tar.gz
+---
 
+## 🏃‍♀️ How to Run
 
-解壓後的內容為：
+You can execute the script with or without specifying a path to the configuration file.
 
+*   **Using the default config file (`/etc/config_backup.yaml`):**
+    ```bash
+    sudo /usr/local/bin/backup_configs.sh
+    ```
+
+*   **Specifying a custom config file path:**
+    ```bash
+    sudo /usr/local/bin/backup_configs.sh /path/to/my/custom_config.yaml
+    ```
+
+### **Example Output**
+
+```
+[INFO] Backup start: 2025-10-09 18:00:05
+[INFO] Using config: /etc/config_backup.yaml
+[INFO] Output dir   : /mnt/backup
+[INFO] Root in tar  : config_backup
+[INFO] >> 處理服務：kafka
+[OK]   file: /etc/kafka/server.properties
+[OK]   file: /etc/kafka/zookeeper.properties
+[INFO] >> 處理服務：nginx
+[OK]   file: /etc/nginx/nginx.conf
+[OK]   dir : /etc/nginx/conf.d/ (recursive)
+[OK]   glob-file: /etc/nginx/sites-enabled/default.conf
+[INFO] >> 處理服務：mongodb
+[OK]   file: /etc/mongod.conf
 config_backup/
+config_backup/kafka/
+config_backup/kafka/server.properties
+...
+[INFO] 完成：/mnt/backup/config_backup_2025-10-09_18:00.tar.gz
+```
+
+---
+
+## 🗂️ Archive Structure
+
+After running the script, a new archive will be created in your specified `backup_dir`. If you extract this archive, the contents will be organized as follows:
+
+```
+<root_dir_name>/
+├── <service_one_name>/
+│   ├── config_file_1.conf
+│   └── some_other_file.properties
+│
+├── <service_two_name>/
+│   ├── another_config.yml
+│   └── included_directory/
+│       └── ...
+└── ...
+```
+
+**Example:**
+
+Based on the sample YAML above, the extracted archive `config_backup_2025-10-09_18:00.tar.gz` would look like this:
+
+```
+my_server_configs/
 ├── kafka/
 │   ├── server.properties
-│   └── controller.properties
+│   └── zookeeper.properties
 ├── mongodb/
 │   └── mongod.conf
 └── nginx/
     ├── nginx.conf
     ├── conf.d/
+    │   └── default.conf
     └── sites-enabled/
+        └── default.conf
+```
 
-⚙️ 腳本說明
+---
 
-檔案：backup_configs.sh
+## 🧠 Tips and Behavior
 
-#!/usr/bin/env bash
-set -euo pipefail
-shopt -s nullglob dotglob globstar
+*   **File Not Found**: If a specified file or directory in `config_paths` or `include_dirs` does not exist, a `[WARN]` message is printed, but the script will continue without interruption.
+*   **No Glob Match**: If a pattern in `include_globs` matches no files, a `[WARN]` message is shown, and the script continues.
+*   **Filename Conflicts**: If two different source files have the same base name (e.g., `/app1/config.yml` and `/app2/config.yml`), the script will automatically rename the second file by appending the first 8 characters of its source path's SHA1 hash.
+    *   Example: `config.yml` becomes `config.yml__a1b2c3d4`.
 
-MAIN_CFG="${1:-/etc/config_backup.yaml}"
-
-# 檢查 yq
-if ! command -v yq >/dev/null 2>&1; then
-  echo "[ERROR] 未找到 yq。請先安裝："
-  echo "  - Debian/Ubuntu: sudo apt-get install -y yq"
-  echo "  - RHEL/CentOS:   sudo yum install -y yq"
-  exit 1
-fi
-
-# 讀取全域設定
-BACKUP_DIR="$(yq -r '.backup_dir // "/mnt/backup"' "$MAIN_CFG")"
-ROOT_DIR_NAME="$(yq -r '.root_dir_name // "config_backup"' "$MAIN_CFG")"
-
-# 準備輸出與暫存
-mkdir -p "$BACKUP_DIR"
-TMP_ROOT="$(mktemp -d)"
-trap 'rm -rf "$TMP_ROOT"' EXIT
-
-STAGE_DIR="$TMP_ROOT/$ROOT_DIR_NAME"
-mkdir -p "$STAGE_DIR"
-
-echo "[INFO] Backup start: $(date '+%F %T')"
-echo "[INFO] Using config: $MAIN_CFG"
-echo "[INFO] Output dir  : $BACKUP_DIR"
-echo "[INFO] Root in tar : $ROOT_DIR_NAME"
-
-# 服務數量
-SERV_COUNT="$(yq -r '.services | length' "$MAIN_CFG" 2>/dev/null || echo 0)"
-if [[ "$SERV_COUNT" -eq 0 ]]; then
-  echo "[WARN] 沒有任何 services 設定；結束。"
-  exit 0
-fi
-
-for ((i=0; i<SERV_COUNT; i++)); do
-  SERVICE_NAME="$(yq -r ".services[$i].name" "$MAIN_CFG")"
-  [[ "$SERVICE_NAME" == "null" || -z "$SERVICE_NAME" ]] && SERVICE_NAME="service_$i"
-
-  DEST_DIR="$STAGE_DIR/$SERVICE_NAME"
-  mkdir -p "$DEST_DIR"
-  echo "[INFO] >> 處理服務：$SERVICE_NAME"
-
-  # 拷貝檔案（config_paths）
-  while IFS= read -r FILE_PATH; do
-    [[ -z "${FILE_PATH:-}" || "$FILE_PATH" == "null" ]] && continue
-    if [[ -f "$FILE_PATH" ]]; then
-      bn="$(basename "$FILE_PATH")"
-      to="$DEST_DIR/$bn"
-      if [[ -e "$to" && ! -d "$to" ]]; then
-        hash="$(echo -n "$FILE_PATH" | sha1sum | awk '{print $1}' | cut -c1-8)"
-        to="$DEST_DIR/${bn}__${hash}"
-        echo "[WARN] 檔名衝突，改名為：$(basename "$to")"
-      fi
-      cp -a "$FILE_PATH" "$to"
-      echo "[OK]  file: $FILE_PATH"
-    else
-      echo "[WARN] file not found: $FILE_PATH"
-    fi
-  done < <(yq -r ".services[$i].config_paths[]?" "$MAIN_CFG")
-
-  # 拷貝整個資料夾（include_dirs）
-  while IFS= read -r DIR_PATH; do
-    [[ -z "${DIR_PATH:-}" || "$DIR_PATH" == "null" ]] && continue
-    if [[ -d "$DIR_PATH" ]]; then
-      cp -a "$DIR_PATH" "$DEST_DIR/"
-      echo "[OK]  dir : $DIR_PATH/ (recursive)"
-    else
-      echo "[WARN] dir not found: $DIR_PATH"
-    fi
-  done < <(yq -r ".services[$i].include_dirs[]?" "$MAIN_CFG")
-
-  # 萬用字元（include_globs）
-  while IFS= read -r PATTERN; do
-    [[ -z "${PATTERN:-}" || "$PATTERN" == "null" ]] && continue
-    eval "paths=( $PATTERN )"
-    if ((${#paths[@]})); then
-      for p in "${paths[@]}"; do
-        if [[ -f "$p" ]]; then
-          bn="$(basename "$p")"
-          to="$DEST_DIR/$bn"
-          if [[ -e "$to" && ! -d "$to" ]]; then
-            hash="$(echo -n "$p" | sha1sum | awk '{print $1}' | cut -c1-8)"
-            to="$DEST_DIR/${bn}__${hash}"
-            echo "[WARN] 檔名衝突，改名為：$(basename "$to")"
-          fi
-          cp -a "$p" "$to"
-          echo "[OK]  glob-file: $p"
-        elif [[ -d "$p" ]]; then
-          cp -a "$p" "$DEST_DIR/"
-          echo "[OK]  glob-dir : $p/ (recursive)"
-        fi
-      done
-    else
-      echo "[WARN] glob no match: $PATTERN"
-    fi
-  done < <(yq -r ".services[$i].include_globs[]?" "$MAIN_CFG")
-
-done
-
-ARCHIVE_NAME="$(date +"config_backup_%F %H:%M").tar.gz"
-tar -zcvf "$BACKUP_DIR/$ARCHIVE_NAME" -C "$TMP_ROOT" "$ROOT_DIR_NAME"
-echo "[INFO] 完成：$BACKUP_DIR/$ARCHIVE_NAME"
-
-🚀 使用方式
-一、安裝
-
-確保系統有 yq
-
-sudo apt-get install -y yq      # Debian/Ubuntu
-sudo yum install -y yq          # RHEL/CentOS
-
-
-將腳本儲存為：
-
-/usr/local/bin/backup_configs.sh
-chmod +x /usr/local/bin/backup_configs.sh
-
-二、執行
-# 預設會讀取 /etc/config_backup.yaml
-sudo /usr/local/bin/backup_configs.sh
-
-# 或指定設定檔路徑
-sudo /usr/local/bin/backup_configs.sh /path/to/config_backup.yaml
-
-三、輸出範例
-[INFO] Backup start: 2025-10-09 18:00:05
-[INFO] Using config: /etc/config_backup.yaml
-[INFO] Output dir  : /mnt/backup
-[INFO] Root in tar : config_backup
-[INFO] >> 處理服務：kafka
-[OK]  file: /var/log/kafka/server.properties
-[OK]  file: /var/log/kafka/controller.properties
-[INFO] >> 處理服務：mongodb
-[OK]  file: /etc/mongod.conf
-[INFO] 完成：/mnt/backup/config_backup_2025-10-09 18:00.tar.gz
-
-🧹 可擴充功能（未預設啟用）
-功能	說明
---clean-old 7	刪除 7 天前的舊壓縮檔
-systemd timer	可設計為每日自動執行
-log 檔紀錄	輸出詳細執行紀錄至 /mnt/backup/backup.log
-🧠 小提示
-
-若某個檔案不存在，會顯示 [WARN] file not found，但不會中止整體執行。
-
-若檔名重複（例如多個服務都叫 config.yaml），腳本會自動加上雜湊避免覆蓋。
-
-解壓後的結構一定會是：
-
-<root_dir_name>/<service_name>/<files...>
-
+---

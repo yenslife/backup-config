@@ -612,9 +612,6 @@ services:
       - /etc/mongod-arbiter07.conf
       - /etc/mongod-arbiter08.conf
       - /etc/mongos.conf
-  - name: vip
-    config_paths:
-      - /etc/keepalived/keepalived.conf
 YAML
 
 # --- 3) 準備日誌檔 ---

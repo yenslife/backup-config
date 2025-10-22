@@ -203,3 +203,13 @@ my_server_configs/
     *   Example: `config.yml` becomes `config.yml__a1b2c3d4`.
 
 ---
+
+## Crontab
+
+```
+sudo crontab -e
+```
+
+```
+0 1 * * * 30 1 * * * /usr/local/bin/backup_configs.sh >> /var/log/cleanup.log 2>&1
+```

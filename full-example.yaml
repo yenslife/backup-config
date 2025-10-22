@@ -29,9 +29,6 @@ services:
   - name: ntp
     config_paths:
       - /etc/chrony.conf
-  - name: vip
-    config_paths:
-      - /etc/keepalived/keepalived.conf
   - name: kafka-kraft
     config_paths:
       - /opt/kafka_2.12-3.9.1/config/kraft/broker.properties

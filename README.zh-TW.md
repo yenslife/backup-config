@@ -58,6 +58,7 @@ sudo touch /etc/config_backup.yaml
 ## ⚙️ 設定檔 (`config_backup.yaml`)
 
 YAML 設定檔定義了壓縮檔的輸出位置，以及每個服務需要備份的具體路徑。
+目前存在 `/etc/backup_config` 底下
 
 ### **檔案結構**
 

@@ -207,5 +207,5 @@ sudo crontab -e
 ```
 
 ```
-0 1 * * * 30 1 * * * /usr/local/bin/backup_configs.sh >> /var/log/cleanup.log 2>&1
+0 1 * * * /usr/local/bin/backup_configs.sh >> /var/log/backup_configs.log 2>&1
 ```

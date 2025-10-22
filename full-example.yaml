@@ -1,0 +1,55 @@
+backup_dir: /etc/backup_config
+root_dir_name: my_server_configs
+
+services:
+  - name: ipfix
+    config_paths:
+      - /etc/ipfixcol2/ipfixcol2.xml
+      - /etc/libfds/user/elements/enterprise-procera.xml
+      - /etc/libfds/system/elements/iana.xml
+      - /etc/libfds/user/element_mapping.txt
+      - /etc/sysctl.d/99-ipfixcol2.conf
+  - name: kafka
+    config_paths:
+      - /opt/kafka_2.12-3.9.1/config/connect-console-sink.properties
+      - /opt/kafka_2.12-3.9.1/config/connect-console-source.properties
+      - /opt/kafka_2.12-3.9.1/config/connect-distributed.properties
+      - /opt/kafka_2.12-3.9.1/config/connect-file-sink.properties
+      - /opt/kafka_2.12-3.9.1/config/connect-file-source.properties
+      - /opt/kafka_2.12-3.9.1/config/connect-log4j.properties
+      - /opt/kafka_2.12-3.9.1/config/connect-mirror-maker.properties
+      - /opt/kafka_2.12-3.9.1/config/connect-standalone.properties
+      - /opt/kafka_2.12-3.9.1/config/consumer.properties
+      - /opt/kafka_2.12-3.9.1/config/log4j.properties
+      - /opt/kafka_2.12-3.9.1/config/producer.properties
+      - /opt/kafka_2.12-3.9.1/config/server.properties
+      - /opt/kafka_2.12-3.9.1/config/tools-log4j.properties
+      - /opt/kafka_2.12-3.9.1/config/trogdor.conf
+      - /opt/kafka_2.12-3.9.1/config/zookeeper.properties
+  - name: ntp
+    config_paths:
+      - /etc/chrony.conf
+  - name: vip
+    config_paths:
+      - /etc/keepalived/keepalived.conf
+  - name: kafka-kraft
+    config_paths:
+      - /opt/kafka_2.12-3.9.1/config/kraft/broker.properties
+      - /opt/kafka_2.12-3.9.1/config/kraft/controller.properties
+      - /opt/kafka_2.12-3.9.1/config/kraft/reconfig-server.properties
+      - /opt/kafka_2.12-3.9.1/config/kraft/server.properties
+  - name: mongo
+    config_paths:
+      - /etc/mongod.conf
+      - /etc/mongod-arbiter01.conf
+      - /etc/mongod-arbiter02.conf
+      - /etc/mongod-arbiter03.conf
+      - /etc/mongod-arbiter04.conf
+      - /etc/mongod-arbiter05.conf
+      - /etc/mongod-arbiter06.conf
+      - /etc/mongod-arbiter07.conf
+      - /etc/mongod-arbiter08.conf
+      - /etc/mongos.conf
+  - name: vip
+    config_paths:
+      - /etc/keepalived/keepalived.conf

@@ -199,3 +199,13 @@ my_server_configs/
 *   **檔名衝突**：如果兩個來自不同路徑的檔案有相同的檔名（例如 `/app1/config.yml` 和 `/app2/config.yml`），腳本會自動將後者的檔名附加其來源路徑的 SHA1 雜湊值前 8 碼，以避免檔案被覆蓋。
     *   範例：`config.yml` 會變成 `config.yml__a1b2c3d4`。
 
+
+## Crontab
+
+```
+sudo crontab -e
+```
+
+```
+0 1 * * * 30 1 * * * /usr/local/bin/backup_configs.sh >> /var/log/cleanup.log 2>&1
+```

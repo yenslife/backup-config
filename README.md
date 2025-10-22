@@ -34,7 +34,7 @@ The script requires `yq` to parse the YAML configuration file. `yq` is a lightwe
     ```
 *   **RHEL/CentOS/Fedora:**
     ```bash
-    sudo yum install -y yq
+    sudo dnf install -y yq
     ```
 
 ### **2. Script Installation**

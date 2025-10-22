@@ -8,7 +8,7 @@ MAIN_CFG="${1:-/etc/config_backup.yaml}"
 if ! command -v yq >/dev/null 2>&1; then
   echo "[ERROR] 未找到 yq。請先安裝："
   echo "  - Debian/Ubuntu: sudo apt-get install -y yq"
-  echo "  - RHEL/CentOS:   sudo yum install -y yq"
+  echo "  - Rocky:   sudo dnf install -y yq"
   exit 1
 fi
 
